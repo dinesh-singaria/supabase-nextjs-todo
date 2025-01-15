@@ -1,6 +1,8 @@
 import { Database } from "@/lib/schema";
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
+import { IoFilter } from "react-icons/io5";
+import DatePicker from "./DatePicker";
 
 type Todos = Database["public"]["Tables"]["todos"]["Row"];
 
@@ -81,7 +83,9 @@ export default function TodoList({ session }: { session: Session }) {
           Assign
         </button>
 
-        
+        <button className="btn-black" type="submit">
+          <IoFilter />
+        </button>
       </form>
       {!!errorText && <Alert text={errorText} />}
       <div className="bg-white shadow overflow-hidden rounded-md">
@@ -127,6 +131,7 @@ const Todo = ({ todo, onDelete }: { todo: Todos; onDelete: () => void }) => {
             {todo.task}
           </div>
         </div>
+        <DatePicker />
         <div>
           <input
             className="cursor-pointer"
