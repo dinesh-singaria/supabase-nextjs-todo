@@ -40,10 +40,10 @@ const Datepick = ({ todoId, initialDate }: Props) => {
   };
 
   return (
-    <div className="relative pr-2 px-1">
+    <div className="relative pr-2 px-1 ">
       <DatePicker
-        wrapperClassName="input-attribute"
-        className="bg-white appearance-none px-4 py-4 rounded-lg shadow border-black text-black"
+        wrapperClassName="input-attribute "
+        className="bg-white  appearance-none px-4 py-4 rounded-lg shadow border-black text-black"
         showIcon
         withPortal
         selected={startDate}
@@ -58,7 +58,7 @@ const Datepick = ({ todoId, initialDate }: Props) => {
           decreaseMonth,
           increaseMonth,
         }) => (
-          <div>
+          <div >
             <button
               aria-label="Previous Month"
               className="react-datepicker__navigation react-datepicker__navigation--previous"

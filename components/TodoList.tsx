@@ -7,11 +7,29 @@ import { useCallback } from "react";
 
 type Todos = Database["public"]["Tables"]["todos"]["Row"];
 
+type Users = Database["public"]["Tables"]["users"]["Row"];
+
 export default function TodoList({ session }: { session: Session }) {
   const supabase = useSupabaseClient<Database>();
   const [todos, setTodos] = useState<Todos[]>([]);
   const [newTaskText, setNewTaskText] = useState("");
   const [errorText, setErrorText] = useState("");
+  const [users, setUsers] = useState<Users[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | null | undefined>(
+    null
+  );
+
+  useEffect(() => {
+    // Fetch users to assign tasks
+    const fetchUsers = async () => {
+      const { data, error } = await supabase.from("users").select("*");
+      // console.log(data)
+      if (error) console.error("Error fetching users:", error);
+      else setUsers(data || []);
+    };
+    fetchUsers();
+  }, [supabase]);
+  // console.log(users);
 
   const user = session.user;
 
@@ -31,12 +49,16 @@ export default function TodoList({ session }: { session: Session }) {
     fetchTodos();
   }, [supabase]);
 
-  const addTodo = async (taskText: string) => {
+  const addTodo = async (taskText: string, assignedTo: string | null) => {
     let task = taskText.trim();
     if (task.length) {
       const { data: todo, error } = await supabase
         .from("todos")
-        .insert({ task, user_id: user.id })
+        .insert({
+          task,
+          user_id: user.id,
+          assigned_to: assignedTo,
+        })
         .select()
         .single();
 
@@ -66,16 +88,13 @@ export default function TodoList({ session }: { session: Session }) {
       query = query.eq("due_date", new Date().toISOString().split("T")[0]);
     }
 
-    const { data: todos, error } = await query;
+    const { data, error } = await query;
 
     if (error) console.error("Error fetching todos:", error);
-    else setTodos(todos || []);
+    else setTodos(data || []);
   }, [filter, supabase, user.id]);
 
   // Call fetchTodos() whenever the filter changes:
-  // useEffect(() => {
-  //   fetchTodos();
-  // }, [filter, supabase]);
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
@@ -92,32 +111,17 @@ export default function TodoList({ session }: { session: Session }) {
   return (
     <div className="w-full">
       <h1 className="mb-12">Todo List.</h1>
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          addTodo(newTaskText);
+          if (selectedUser !== undefined) {
+            addTodo(newTaskText, selectedUser);
+          }
         }}
         className="flex gap-2 my-2"
       >
-        <input
-          className="rounded w-full p-2"
-          type="text"
-          placeholder="make coffee"
-          value={newTaskText}
-          onChange={(e) => {
-            setErrorText("");
-            setNewTaskText(e.target.value);
-          }}
-        />
-        <button className="btn-black" type="submit">
-          Add
-        </button>
-
-        <button className="btn-black" type="submit">
-          Assign
-        </button>
-
-        <div>
+        <div className="mt-1">
           <button
             className="btn-black"
             onClick={(e) => {
@@ -132,12 +136,6 @@ export default function TodoList({ session }: { session: Session }) {
           <div
             id="filterDropdown"
             className="absolute bg-white shadow-md rounded-md hidden z-10 mt-2 p-2"
-            // style={{
-            //   top: "0" /* You can adjust this based on the button's position */,
-            //   left: "100%" /* Positions the element to the right of the button */,
-            //   transform:
-            //     "translateX(10px)" /* Optional: Adds a small gap between the button and the element */,
-            // }}
           >
             <button
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
@@ -196,6 +194,36 @@ export default function TodoList({ session }: { session: Session }) {
             </button>
           </div>
         </div>
+        <input
+          className="border rounded w-full p-2 border-slate-150 "
+          type="text"
+          placeholder="make coffee"
+          value={newTaskText}
+          onChange={(e) => {
+            setErrorText("");
+            setNewTaskText(e.target.value);
+          }}
+        />
+        {/* <button className="btn-black" type="submit">
+          Add
+        </button> */}
+
+        <select
+          className="btn-black "
+          onChange={(e) => setSelectedUser(e.target.value)}
+          value={selectedUser || ""}
+        >
+          <option value="">Assign</option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.username}
+            </option>
+          ))}
+        </select>
+
+        <button className="btn-black" type="submit">
+          Add
+        </button>
       </form>
       {!!errorText && <Alert text={errorText} />}
       <div className="bg-white shadow overflow-hidden rounded-md">

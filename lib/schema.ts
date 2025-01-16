@@ -36,6 +36,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "notifications_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "notifications_task_id_fkey";
             columns: ["task_id"];
             isOneToOne: false;
@@ -71,6 +78,38 @@ export type Database = {
           is_complete?: boolean | null;
           task?: string | null;
           user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "todos_assigned_to_fkey";
+            columns: ["assigned_to"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      users: {
+        Row: {
+          created_at: string | null;
+          email: string;
+          id: string;
+          is_active: boolean | null;
+          username: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          email: string;
+          id?: string;
+          is_active?: boolean | null;
+          username: string;
+        };
+        Update: {
+          created_at?: string | null;
+          email?: string;
+          id?: string;
+          is_active?: boolean | null;
+          username?: string;
         };
         Relationships: [];
       };
