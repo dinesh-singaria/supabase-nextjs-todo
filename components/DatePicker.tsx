@@ -1,11 +1,44 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.min.css";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Database } from "@/lib/schema";
 
-const Datepick = () => {
-  const [startDate, setStartDate] = useState(
-    new Date().setDate(new Date().getDate() + 3)
+type Props = {
+  todoId: number;
+  initialDate?: string | null; // Initial date from the database (if available)
+};
+
+const Datepick = ({ todoId, initialDate }: Props) => {
+  const supabase = useSupabaseClient<Database>();
+
+  // Parse the initial date if provided, otherwise default to today
+  const [startDate, setStartDate] = useState<Date | null>(
+    initialDate ? new Date(initialDate) : new Date()
   );
+
+  // Update the `due_date` in Supabase
+  const updateDueDate = async (date: Date | null) => {
+    if (!date) return;
+
+    try {
+      const { error } = await supabase
+        .from("todos")
+        .update({ due_date: date.toISOString().split("T")[0] }) // Format as YYYY-MM-DD
+        .eq("id", todoId);
+
+      // console.log(date)
+
+      if (error) {
+        console.error("Error updating due_date:", error);
+      } else {
+        console.log("Due date updated successfully.");
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+  };
+
   return (
     <div className="relative pr-2 px-1">
       <DatePicker
@@ -13,17 +46,10 @@ const Datepick = () => {
         className="bg-white appearance-none px-4 py-4 rounded-lg shadow border-black text-black"
         showIcon
         withPortal
-        excludeDateIntervals={[
-          {
-            start: new Date(),
-            end: new Date(new Date().setDate(new Date().getDate())),
-          },
-        ]}
-        selected={new Date(startDate)}
+        selected={startDate}
         onChange={(date) => {
-          if (date !== null) {
-            setStartDate(date.getTime());
-          }
+          setStartDate(date); // Update local state
+          updateDueDate(date); // Save to Supabase
         }}
         monthsShown={1}
         renderCustomHeader={({
@@ -35,19 +61,13 @@ const Datepick = () => {
           <div>
             <button
               aria-label="Previous Month"
-              className={
-                "react-datepicker__navigation react-datepicker__navigation--previous"
-              }
+              className="react-datepicker__navigation react-datepicker__navigation--previous"
               style={
                 customHeaderCount === 1 ? { visibility: "hidden" } : undefined
               }
               onClick={decreaseMonth}
             >
-              <span
-                className={
-                  "react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"
-                }
-              >
+              <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous">
                 {"<"}
               </span>
             </button>
@@ -59,19 +79,13 @@ const Datepick = () => {
             </span>
             <button
               aria-label="Next Month"
-              className={
-                "react-datepicker__navigation react-datepicker__navigation--next"
-              }
+              className="react-datepicker__navigation react-datepicker__navigation--next"
               style={
                 customHeaderCount === 1 ? { visibility: "hidden" } : undefined
               }
               onClick={increaseMonth}
             >
-              <span
-                className={
-                  "react-datepicker__navigation-icon react-datepicker__navigation-icon--next"
-                }
-              >
+              <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next">
                 {">"}
               </span>
             </button>

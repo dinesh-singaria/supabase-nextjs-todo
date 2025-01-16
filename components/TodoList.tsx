@@ -3,6 +3,7 @@ import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { IoFilter } from "react-icons/io5";
 import DatePicker from "./DatePicker";
+import { useCallback } from "react";
 
 type Todos = Database["public"]["Tables"]["todos"]["Row"];
 
@@ -13,6 +14,8 @@ export default function TodoList({ session }: { session: Session }) {
   const [errorText, setErrorText] = useState("");
 
   const user = session.user;
+
+  const [filter, setFilter] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -45,6 +48,37 @@ export default function TodoList({ session }: { session: Session }) {
       }
     }
   };
+
+  // fetchTodos function to apply filters dynamically:
+  const fetchTodos = useCallback(async () => {
+    let query = supabase
+      .from("todos")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (filter === "assignedToMe") {
+      query = query.eq("assigned_to", user.id);
+    } else if (filter === "createdByMe") {
+      query = query.eq("user_id", user.id);
+    } else if (filter === "overdue") {
+      query = query.lt("due_date", new Date().toISOString().split("T")[0]);
+    } else if (filter === "dueToday") {
+      query = query.eq("due_date", new Date().toISOString().split("T")[0]);
+    }
+
+    const { data: todos, error } = await query;
+
+    if (error) console.error("Error fetching todos:", error);
+    else setTodos(todos || []);
+  }, [filter, supabase, user.id]);
+
+  // Call fetchTodos() whenever the filter changes:
+  // useEffect(() => {
+  //   fetchTodos();
+  // }, [filter, supabase]);
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
 
   const deleteTodo = async (id: number) => {
     try {
@@ -83,9 +117,85 @@ export default function TodoList({ session }: { session: Session }) {
           Assign
         </button>
 
-        <button className="btn-black" type="submit">
-          <IoFilter />
-        </button>
+        <div>
+          <button
+            className="btn-black"
+            onClick={(e) => {
+              e.stopPropagation();
+              document
+                .getElementById("filterDropdown")
+                ?.classList.toggle("hidden");
+            }}
+          >
+            <IoFilter />
+          </button>
+          <div
+            id="filterDropdown"
+            className="absolute bg-white shadow-md rounded-md hidden z-10 mt-2 p-2"
+            // style={{
+            //   top: "0" /* You can adjust this based on the button's position */,
+            //   left: "100%" /* Positions the element to the right of the button */,
+            //   transform:
+            //     "translateX(10px)" /* Optional: Adds a small gap between the button and the element */,
+            // }}
+          >
+            <button
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+              onClick={() => {
+                setFilter("assignedToMe");
+                document
+                  .getElementById("filterDropdown")
+                  ?.classList.add("hidden");
+              }}
+            >
+              Tasks Assigned to Me
+            </button>
+            <button
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+              onClick={() => {
+                setFilter("createdByMe");
+                document
+                  .getElementById("filterDropdown")
+                  ?.classList.add("hidden");
+              }}
+            >
+              Tasks I Created
+            </button>
+            <button
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+              onClick={() => {
+                setFilter("overdue");
+                document
+                  .getElementById("filterDropdown")
+                  ?.classList.add("hidden");
+              }}
+            >
+              Overdue Tasks
+            </button>
+            <button
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+              onClick={() => {
+                setFilter("dueToday");
+                document
+                  .getElementById("filterDropdown")
+                  ?.classList.add("hidden");
+              }}
+            >
+              Tasks Due Today
+            </button>
+            <button
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+              onClick={() => {
+                setFilter(null);
+                document
+                  .getElementById("filterDropdown")
+                  ?.classList.add("hidden");
+              }}
+            >
+              Clear Filter
+            </button>
+          </div>
+        </div>
       </form>
       {!!errorText && <Alert text={errorText} />}
       <div className="bg-white shadow overflow-hidden rounded-md">
@@ -131,7 +241,11 @@ const Todo = ({ todo, onDelete }: { todo: Todos; onDelete: () => void }) => {
             {todo.task}
           </div>
         </div>
-        <DatePicker />
+        <DatePicker
+          key={todo.id}
+          todoId={todo.id}
+          initialDate={todo.due_date || null} // Handle null or missing dates
+        />
         <div>
           <input
             className="cursor-pointer"
