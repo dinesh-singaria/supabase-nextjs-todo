@@ -54,7 +54,7 @@ npm install
 
 ### 3. Configure Environment Variables
 
-Create a .env.local file in the root directory and add the following:
+Create a .env.local file in the root directory and add the following if you want to connect your own database using supabase:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
