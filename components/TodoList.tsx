@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { IoFilter } from "react-icons/io5";
 import DatePicker from "./DatePicker";
 import { useCallback } from "react";
+import Notifications from "./Notifications";
+import { useSession } from "@supabase/auth-helpers-react";
 
 type Todos = Database["public"]["Tables"]["todos"]["Row"];
 
@@ -15,6 +17,7 @@ export default function TodoList({ session }: { session: Session }) {
   const [newTaskText, setNewTaskText] = useState("");
   const [errorText, setErrorText] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
+  const userId = session?.user?.id;
   const [selectedUser, setSelectedUser] = useState<string | null | undefined>(
     null
   );
@@ -111,6 +114,9 @@ export default function TodoList({ session }: { session: Session }) {
   return (
     <div className="w-full">
       <h1 className="mb-12">Todo List.</h1>
+
+      {/* Notifications component here */}
+      {userId && <Notifications userId={userId} />}
 
       <form
         onSubmit={(e) => {
