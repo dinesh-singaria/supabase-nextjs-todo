@@ -1,90 +1,75 @@
-# Todo example using Supabase
+# Supabase Next.js Todo App
 
-- Frontend:
-  - [Next.js](https://github.com/vercel/next.js) - a React framework for production.
-  - [Tailwind](https://tailwindcss.com/) for styling and layout.
-  - [Supabase.js](https://supabase.com/docs/library/getting-started) for user management and realtime data syncing.
-- Backend:
-  - [supabase.com/dashboard](https://supabase.com/dashboard/): hosted Postgres database with restful API for usage with Supabase.js.
-
-## Deploy with Vercel
-
-The Vercel deployment will guide you through creating a Supabase account and project. After installation of the Supabase integration, all relevant environment variables will be set up so that the project is usable immediately after deployment 🚀
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase%2Fsupabase%2Ftree%2Fmaster%2Fexamples%2Ftodo-list%2Fnextjs-todo-list&project-name=supabase-nextjs-todo-list&repository-name=supabase-nextjs-todo-list&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&external-id=https%3A%2F%2Fgithub.com%2Fsupabase%2Fsupabase%2Ftree%2Fmaster%2Fexamples%2Ftodo-list%2Fnextjs-todo-list)
-
-### 1. Create new project
-
-Sign up to Supabase - [https://supabase.com/dashboard](https://supabase.com/dashboard) and create a new project. Wait for your database to start.
-
-### 2. Run "Todo List" Quickstart
-
-Once your database has started, run the "Todo List" quickstart. Inside of your project, enter the `SQL editor` tab and scroll down until you see `TODO LIST: Build a basic todo list with Row Level Security`.
-
-### 3. Get the URL and Key
-
-Go to the Project Settings (the cog icon), open the API tab, and find your API URL and `anon` key, you'll need these in the next step.
-
-The `anon` key is your client-side API key. It allows "anonymous access" to your database, until the user has logged in. Once they have logged in, the keys will switch to the user's own login token. This enables row level security for your data. Read more about this [below](#postgres-row-level-security).
-
-![image](https://user-images.githubusercontent.com/10214025/88916245-528c2680-d298-11ea-8a71-708f93e1ce4f.png)
-
-**_NOTE_**: The `service_role` key has full access to your data, bypassing any security policies. These keys have to be kept secret and are meant to be used in server environments and never on a client or browser.
-
-## Supabase details
-
-### Using a Remote Supabase Project
-
-1. Create or select a project on [Supabase Dashboard](https://supabase.com/dashboard).
-2. Copy and fill the dotenv template `cp .env.production.example .env.production`
-3. Link the local project and merge the local configuration with the remote one:
-
-```bash
-SUPABASE_ENV=production npx supabase@latest link --project-ref <your-project-ref>
-```
-
-3. Sync the configuration:
-
-```bash
-SUPABASE_ENV=production npx supabase@latest config push
-```
-
-4. Sync the database schema:
-
-```bash
-SUPABASE_ENV=production npx supabase@latest db push
-```
-
-## Vercel Preview with Branching
-
-Supabase integrates seamlessly with Vercel's preview branches, giving each branch a dedicated Supabase project. This setup allows testing database migrations or service configurations safely before applying them to production.
-
-### Steps
-
-1. Ensure the Vercel project is linked to a Git repository.
-2. Configure the "Preview" environment variables in Vercel:
-
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-3. Create a new branch, make changes (e.g., update `max_frequency`), and push the branch to Git.
-   - Open a pull request to trigger Vercel + Supabase integration.
-   - Upon successful deployment, the preview environment reflects the changes.
-
-![Preview Checks](https://github.com/user-attachments/assets/db688cc2-60fd-4463-bbed-e8ecc11b1a39)
+A collaborative Todo application that allows users to create, assign, and manage tasks with real-time updates.
 
 ---
 
-### Postgres Row level security
+## 🚀 Features
 
-This project uses very high-level Authorization using Postgres' Row Level Security.
-When you start a Postgres database on Supabase, we populate it with an `auth` schema, and some helper functions.
-When a user logs in, they are issued a JWT with the role `authenticated` and their UUID.
-We can use these details to provide fine-grained control over what each user can and cannot do.
+- **User Authentication**: Powered by Supabase.
+- **Task Management**: Create, assign, and filter tasks.
+- **Real-time Updates**: Instant task and notification updates.
+- **Notifications**: Users receive notifications when assigned a task.
+- **Filters**: Filter tasks by assignment, creation, due date, or completion status.
 
-This is a trimmed-down schema, with the policies:
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Realtime, Auth)
+- **Deployment**: Vercel
+
+---
+
+## 📂 Project Setup Instructions
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+1. **Node.js**: v16+
+2. **npm** or **yarn**
+3. A **Supabase Project**:
+   - Sign up at [Supabase](https://supabase.io) and create a new project.
+
+---
+
+### 📝 Steps to Set Up
+
+#### 1. Clone the Repository
+
+ ```bash
+git clone https://github.com/dinesh-singaria/supabase-nextjs-todo.git
+cd supabase-nextjs-todo
+```
+
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+
+### 3. Configure Environment Variables
+
+Create a .env.local file in the root directory and add the following:
+```env
+NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
+```
+Replace <your_supabase_url> and <your_supabase_anon_key> with the values from your Supabase project (found under Settings > API).
+
+
+### 4. Set Up the Database
+
+	1.	Open the Supabase SQL Editor.
+ 	2.	Run the following SQL to create the required tables/relations/policies:
+  
 
 ```sql
+
 create table todos (
   id bigint generated by default as identity primary key,
   user_id uuid references auth.users not null,
@@ -92,24 +77,155 @@ create table todos (
   is_complete boolean default false,
   inserted_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
-
 alter table todos enable row level security;
-
 create policy "Individuals can create todos." on todos for
-    insert with check ((select auth.uid()) = user_id);
-
+    insert with check (auth.uid() = user_id);
 create policy "Individuals can view their own todos. " on todos for
     select using ((select auth.uid()) = user_id);
-
 create policy "Individuals can update their own todos." on todos for
     update using ((select auth.uid()) = user_id);
-
 create policy "Individuals can delete their own todos." on todos for
     delete using ((select auth.uid()) = user_id);
+
+
+ALTER TABLE todos
+ADD COLUMN assigned_to UUID REFERENCES auth.users (id),
+ADD COLUMN due_date TIMESTAMPTZ,
+ADD COLUMN created_by UUID REFERENCES auth.users (id);
+
+-- Allow users to view tasks assigned to them, in addition to the ones they created.
+create policy "Individuals can view their own or assigned todos." on todos for 
+  select using ((auth.uid() = user_id) or (auth.uid() = assigned_to));
+
+-- Allow only the task creator to update or delete tasks, 
+-- but the assignee should not be able to modify tasks they are assigned.
+create policy "Individuals can update their own todos." on todos for 
+  update using (auth.uid() = user_id);
+
+create policy "Individuals can delete their own todos." on todos for 
+  delete using (auth.uid() = user_id);
+
+
+
+--table to store notifications to implement real-time notifications
+create table notifications (
+  id bigint generated by default as identity primary key,
+  recipient_id uuid references auth.users not null, -- User who receives the notification
+  task_id bigint references todos(id),             -- Associated task
+  message text not null,                           -- Notification message
+  is_read boolean default false,                   -- Mark notifications as read
+  created_at timestamp with time zone default timezone('utc', now()) not null
+);
+
+create policy "Individuals can view their own notifications." on notifications for 
+  select using (auth.uid() = recipient_id);
+
+
+ALTER TABLE todos ALTER COLUMN due_date SET DEFAULT CURRENT_DATE;
+
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for each user
+    username TEXT NOT NULL,                       -- Display name for the user
+    email TEXT UNIQUE NOT NULL,                   -- User's email address
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(), -- Timestamp of when the user was created
+    is_active BOOLEAN DEFAULT true                -- Indicates if the user is active
+);
+
+
+
+-- Insert example users into the users table
+
+INSERT INTO users (id, username, email, created_at, is_active)
+VALUES 
+  ('123e4567-e89b-12d3-a456-426614174000', 'Alice Smith', 'alice@example.com', '2025-01-14T10:00:00Z', true),
+  ('123e4567-e89b-12d3-a456-426614174001', 'Bob Johnson', 'bob@example.com', '2025-01-14T11:30:00Z', true),
+  ('123e4567-e89b-12d3-a456-426614174002', 'Charlie Lee', 'charlie@example.com', '2025-01-15T08:45:00Z', false),
+  ('123e4567-e89b-12d3-a456-426614174003', 'Diana Prince', 'diana@example.com', '2025-01-16T09:00:00Z', true),
+  ('123e4567-e89b-12d3-a456-426614174004', 'Ethan Hunt', 'ethan@example.com', '2025-01-16T10:15:00Z', true);
+
+
+
+
+ALTER TABLE todos
+DROP CONSTRAINT IF EXISTS todos_assigned_to_fkey;
+
+ALTER TABLE todos
+ADD CONSTRAINT todos_assigned_to_fkey FOREIGN KEY (assigned_to)
+REFERENCES users(id) ON DELETE SET NULL;
+
+
+
+
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_task_id_fkey;
+
+ALTER TABLE notifications
+ADD CONSTRAINT notifications_task_id_fkey FOREIGN KEY (task_id)
+REFERENCES todos(id) ON DELETE CASCADE;
+
+
+-- Function to create a notification when a task is assigned
+CREATE OR REPLACE FUNCTION notify_task_assignment()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Check if the task is being assigned or reassigned
+  IF (TG_OP = 'INSERT' AND NEW.assigned_to IS NOT NULL) OR
+     (TG_OP = 'UPDATE' AND NEW.assigned_to IS NOT NULL AND NEW.assigned_to IS DISTINCT FROM OLD.assigned_to) THEN
+    INSERT INTO notifications (recipient_id, task_id, message)
+    VALUES (
+      NEW.assigned_to,
+      NEW.id,
+      'You have been assigned a new task: ' || COALESCE(NEW.task, 'Untitled Task')
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for the todos table to notify on assignment or reassignment
+CREATE TRIGGER task_assignment_trigger
+AFTER INSERT OR UPDATE ON todos
+FOR EACH ROW
+EXECUTE FUNCTION notify_task_assignment();
 ```
+3. Enable Realtime for todos and notifications tables:
+   •	Navigate to Database > Realtime in Supabase.
+	 •	Enable subscriptions for the tables.
 
-## Authors
 
-- [Supabase](https://supabase.com)
+### 5. Run the Development Server
 
-Supabase is open source. We'd love for you to follow along and get involved at https://github.com/supabase/supabase
+Start the server locally:
+```bash
+npm build
+npm run dev
+```
+Visit http://localhost:3000 to view the app in your browser.
+
+
+🖥️ Usage
+	1.	Sign Up: Create an account to start using the app.
+	2.	Create Tasks: Add tasks for yourself or assign them to others.
+	3.	View Notifications: See real-time notifications for assigned tasks.
+	4.	Filter Tasks: Use filters to organize your task list.
+
+
+ 🚀 Deployment
+	1.	Deploy the app using Vercel.
+	2.	Set up the same environment variables on Vercel:
+	•	NEXT_PUBLIC_SUPABASE_URL
+	•	NEXT_PUBLIC_SUPABASE_ANON_KEY
+	3.	Ensure your Supabase project is accessible from the deployed domain.
+
+
+ 🛠️ Future Enhancements
+	•	Add recurring tasks.
+	•	Support comments on tasks.
+	•	Implement testing with Jest and React Testing Library.
+	•	Add a dark mode theme.
+
+ 📧 Contact
+For any queries, reach out to [dineshsingaria.111@gmail.com/+44 7741545733].
+
+Happy Coding! 🎉
