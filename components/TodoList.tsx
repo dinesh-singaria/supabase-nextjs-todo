@@ -203,6 +203,7 @@ export default function TodoList({ session }: { session: Session }) {
             setErrorText("");
             setNewTaskText(e.target.value);
           }}
+          // required
         />
         {/* <button className="btn-black" type="submit">
           Add
@@ -210,8 +211,9 @@ export default function TodoList({ session }: { session: Session }) {
 
         <select
           className="btn-black "
+          value={selectedUser || "Me"}
           onChange={(e) => setSelectedUser(e.target.value)}
-          value={selectedUser || ""}
+          required
         >
           <option value="">Assign</option>
           {users.map((u) => (
@@ -233,6 +235,7 @@ export default function TodoList({ session }: { session: Session }) {
               key={todo.id}
               todo={todo}
               onDelete={() => deleteTodo(todo.id)}
+              users={users}
             />
           ))}
         </ul>
@@ -241,7 +244,15 @@ export default function TodoList({ session }: { session: Session }) {
   );
 }
 
-const Todo = ({ todo, onDelete }: { todo: Todos; onDelete: () => void }) => {
+const Todo = ({
+  todo,
+  onDelete,
+  users,
+}: {
+  todo: Todos;
+  onDelete: () => void;
+  users: any[];
+}) => {
   const supabase = useSupabaseClient<Database>();
   const [isCompleted, setIsCompleted] = useState(todo.is_complete);
 
@@ -265,8 +276,19 @@ const Todo = ({ todo, onDelete }: { todo: Todos; onDelete: () => void }) => {
     <li className="w-full block cursor-pointer hover:bg-200 focus:outline-none focus:bg-200 transition duration-150 ease-in-out">
       <div className="flex items-center px-4 py-4 sm:px-6">
         <div className="min-w-0 flex-1 flex items-center">
-          <div className="text-sm leading-5 font-medium truncate">
-            {todo.task}
+          <div className="text-sm leading-5 font-medium">
+            {todo.assigned_to && (
+              <span>
+                <div className="card w-40 bg-base-100 shadow-xl">
+                  <div className="card-body">
+                    <h2 className="card-title text-xl">{todo.task}</h2>
+                  </div>
+                </div>
+                Assigned to:{" "}
+                {users.find((u) => u.id === todo.assigned_to)?.username ||
+                  "Unknown"}
+              </span>
+            )}
           </div>
         </div>
         <DatePicker
