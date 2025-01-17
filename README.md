@@ -76,6 +76,8 @@ Visit http://localhost:3000 to view the app in your browser.
 if you are signing up for the first time just enter your email and then you will receive a mail from Auth Supabase for authentication
 Now ToDoApp will be up and running for your use.
 
+---
+
 
 🖥️ Usage
 	1.	Sign Up: Create an account to start using the app.
