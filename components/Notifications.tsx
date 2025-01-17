@@ -43,7 +43,6 @@ export default function Notifications({ userId }: { userId: string }) {
 
   return (
     <div>
-      
       <ul>
         {notifications.map((notification) => (
           <li key={notification.id}>

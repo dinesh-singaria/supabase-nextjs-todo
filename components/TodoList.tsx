@@ -8,7 +8,6 @@ import Notifications from "./Notifications";
 import { useSession } from "@supabase/auth-helpers-react";
 
 type Todos = Database["public"]["Tables"]["todos"]["Row"];
-
 type Users = Database["public"]["Tables"]["users"]["Row"];
 
 export default function TodoList({ session }: { session: Session }) {
@@ -18,6 +17,8 @@ export default function TodoList({ session }: { session: Session }) {
   const [errorText, setErrorText] = useState("");
   const [users, setUsers] = useState<Users[]>([]);
   const userId = session?.user?.id;
+  const user = session.user;
+  const [filter, setFilter] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<string | null | undefined>(
     null
   );
@@ -34,18 +35,19 @@ export default function TodoList({ session }: { session: Session }) {
   }, [supabase]);
   // console.log(users);
 
-  const user = session.user;
-
-  const [filter, setFilter] = useState<string | null>(null);
-
   useEffect(() => {
+    // Fetch todos to assign tasks
     const fetchTodos = async () => {
       const { data: todos, error } = await supabase
         .from("todos")
         .select("*")
         .order("id", { ascending: true });
 
-      if (error) console.log("error", error);
+      if (error)
+        console.log(
+          "error",
+          error
+        ); //If an error occurs, it logs error to the console.
       else setTodos(todos);
     };
 
@@ -127,6 +129,7 @@ export default function TodoList({ session }: { session: Session }) {
         }}
         className="flex gap-2 my-2"
       >
+        {/* filter button   */}
         <div className="mt-1">
           <button
             className="btn-black"
@@ -139,6 +142,7 @@ export default function TodoList({ session }: { session: Session }) {
           >
             <IoFilter />
           </button>
+
           <div
             id="filterDropdown"
             className="absolute bg-white shadow-md rounded-md hidden z-10 mt-2 p-2"
@@ -200,6 +204,8 @@ export default function TodoList({ session }: { session: Session }) {
             </button>
           </div>
         </div>
+
+        {/* Input field */}
         <input
           className="border rounded w-full p-2 border-slate-150 "
           type="text"
@@ -209,12 +215,9 @@ export default function TodoList({ session }: { session: Session }) {
             setErrorText("");
             setNewTaskText(e.target.value);
           }}
-          // required
         />
-        {/* <button className="btn-black" type="submit">
-          Add
-        </button> */}
 
+        {/* Dropdown for assigning tasks */}
         <select
           className="btn-black "
           value={selectedUser || "Me"}
@@ -234,6 +237,8 @@ export default function TodoList({ session }: { session: Session }) {
         </button>
       </form>
       {!!errorText && <Alert text={errorText} />}
+
+      {/* ToDoList */}
       <div className="bg-white shadow overflow-hidden rounded-md">
         <ul>
           {todos.map((todo) => (

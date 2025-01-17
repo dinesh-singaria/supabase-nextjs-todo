@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.min.css";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Database } from "@/lib/schema";
+import "react-datepicker/dist/react-datepicker.min.css";
 
 type Props = {
   todoId: number;
@@ -20,13 +20,11 @@ const Datepick = ({ todoId, initialDate }: Props) => {
   // Update the `due_date` in Supabase
   const updateDueDate = async (date: Date | null) => {
     if (!date) return;
-
     try {
       const { error } = await supabase
         .from("todos")
         .update({ due_date: date.toISOString().split("T")[0] }) // Format as YYYY-MM-DD
         .eq("id", todoId);
-
       // console.log(date)
 
       if (error) {
@@ -59,6 +57,7 @@ const Datepick = ({ todoId, initialDate }: Props) => {
           increaseMonth,
         }) => (
           <div>
+            {/* PrevMonthButton */}
             <button
               aria-label="Previous Month"
               className="react-datepicker__navigation react-datepicker__navigation--previous"
@@ -71,12 +70,15 @@ const Datepick = ({ todoId, initialDate }: Props) => {
                 {"<"}
               </span>
             </button>
+
             <span className="react-datepicker__current-month">
               {monthDate.toLocaleString("en-US", {
                 month: "long",
                 year: "numeric",
               })}
             </span>
+
+            {/* NextMonthButton */}
             <button
               aria-label="Next Month"
               className="react-datepicker__navigation react-datepicker__navigation--next"
